@@ -7,14 +7,18 @@ import styles from '../styles/Home.module.css';
 
 import axios from 'axios';
 
+import { setAccessToken } from '../functions/accessToken';
+
 const Home: NextPage = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 
-	const [errors, setErrors] = useState([]);
+	const [errors, setErrors] = useState([{ msg: '' }]);
+	const [user, setUser] = useState({ nom: '', prenom: '' });
 
 	const onLogin = (e: any): void => {
 		e.preventDefault();
+		setErrors([{ msg: '' }]);
 
 		axios
 			.post('http://localhost:8000/api/auth/signin', { email, password })
@@ -22,6 +26,8 @@ const Home: NextPage = () => {
 				if (res.data.data === null) {
 					setErrors(res.data.error);
 				} else {
+					setUser(res.data.data.user);
+					setAccessToken(res.data.data.accessToken);
 				}
 			})
 			.catch((err) => {
@@ -55,34 +61,33 @@ const Home: NextPage = () => {
 					and variables
 				</p>
 
-				{errors.length > 0 && (
-					<p className={styles.description}>
-						{errors.map((e, i) => {
-							<p key={i} className={styles.error}>
-								{JSON.stringify(e.msg)}
-							</p>;
-						})}
-					</p>
+				{errors[0].msg.length > 0 &&
+					errors.map((e, i) => (
+						<p key={i} className={styles.error}>
+							{e.msg}
+						</p>
+					))}
+
+				{user.nom.length < 1 ? (
+					<form className={styles.form}>
+						<label htmlFor='email'>Email</label>
+						<input name='email' id='email' placeholder='email' type='email' onChange={setM} />
+						<label htmlFor='password'>Password</label>
+						<input name='password' id='password' placeholder='password' type='password' onChange={setP} />
+						<button onClick={onLogin} type='submit' disabled={!(email.length > 0 && password.length > 0)}>
+							Login
+						</button>
+					</form>
+				) : (
+					<div className={styles.grid}>
+						<Link href='/profile'>
+							<a className={styles.card}>
+								<h2>Profile &rarr;</h2>
+								<p>Check out your profile.</p>
+							</a>
+						</Link>
+					</div>
 				)}
-
-				<form className={styles.form}>
-					<label htmlFor='email'>Email</label>
-					<input name='email' id='email' placeholder='email' type='email' onChange={setM} />
-					<label htmlFor='password'>Password</label>
-					<input name='password' id='password' placeholder='password' type='password' onChange={setP} />
-					<button onClick={onLogin} type='submit' disabled={!(email.length > 0 && password.length > 0)}>
-						Login
-					</button>
-				</form>
-
-				<div className={styles.grid}>
-					<Link href='/profile'>
-						<a className={styles.card}>
-							<h2>Profile &rarr;</h2>
-							<p>Check out your profile.</p>
-						</a>
-					</Link>
-				</div>
 			</main>
 		</div>
 	);

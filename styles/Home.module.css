@@ -41,8 +41,10 @@
 }
 
 .error {
-	background: #d4486b;
+	background: #e7597d;
 	color: white;
+	padding: 1em 1.5em;
+	border-radius: 0.4em;
 }
 
 .code {
