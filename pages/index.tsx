@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { NextPage } from 'next';
 import Head from 'next/head';
@@ -7,7 +7,7 @@ import styles from '../styles/Home.module.css';
 
 import axios from 'axios';
 
-import { setAccessToken } from '../functions/accessToken';
+import { setAccessToken } from '../libs/accessToken';
 
 const Home: NextPage = () => {
 	const [email, setEmail] = useState('');
@@ -16,12 +16,23 @@ const Home: NextPage = () => {
 	const [errors, setErrors] = useState([{ msg: '' }]);
 	const [user, setUser] = useState({ nom: '', prenom: '' });
 
+	useEffect(() => {
+		axios
+			.post('http://127.0.0.1:8000/refresh_token', undefined, { withCredentials: true })
+			.then((r) => {
+				console.log(r.data.data);
+				setAccessToken(r.data.data.accessToken);
+				setUser(r.data.data.user);
+			})
+			.catch((err) => console.log(err));
+	}, []);
+
 	const onLogin = (e: any): void => {
 		e.preventDefault();
 		setErrors([{ msg: '' }]);
 
 		axios
-			.post('http://localhost:8000/api/auth/signin', { email, password })
+			.post('http://127.0.0.1:8000/api/auth/signin', { email, password }, { withCredentials: true })
 			.then((res) => {
 				if (res.data.data === null) {
 					setErrors(res.data.error);
